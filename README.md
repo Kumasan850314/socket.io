@@ -100,7 +100,7 @@ io.on('connection', function (socket) {
 
 ## 連線
 ```javascript=
-var socket = io('http://203.68.184.201:2341');
+var socket = io('http://203.XX.XXX.XXX:2341');
 ```
 ### OR本機端
 ```javascript=
