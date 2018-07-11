@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<title>Examples</title>
+<meta name="description" content="">
+<meta name="keywords" content="">
+<link href="" rel="stylesheet">
+<script type="text/javascript" src="http://code.jquery.com/jquery-latest.min.js"></script>
+<!-- in src use 2341 as port to get the socket.io.js -->
+<script src="http://localhost:2341/socket.io/socket.io.js"></script>
+<!-- connect to localhost 2341 port  -->
+</head>
+<style type="text/css">
+   .con{
+    margin: 0px auto;
+    width: 80vw;
+    height: 85vh;
+    max-height:85vh;
+    display: grid;
+    grid-template-rows: 1fr 10fr 1fr;
+    grid-template-columns: auto;
+    grid-template-areas: 
+      "B1 B1"
+      "B2 B2"
+      "B3 B3";    
+  }
+    .num{
+      grid-area: A1;
+    }
+    .title{
+      text-align: center;
+      grid-area: B1;border: 3px solid #fa0;
+    }
+    .main{
+      padding: 5px;
+      grid-area: B2;border: 3px solid #7af;
+      max-height:5fr;
+      overflow-y: scroll;
+    }
+    .chat{
+      grid-area: B3;border: 3px solid #9fa;
+    }
+    input{
+      border: 1px solid #ccc; 
+      padding: 7px 0px;
+      border-radius: 3px;
+      padding-left:5px;
+    }
+    button{
+      border-radius: 5px;
+      border: none;
+      background: #1f428e;
+      padding: 5px;
+      cursor: pointer;
+      color: white;
+    }
+
+</style>
+<body>
+  <div class="con">
+    <div class="title"><h1>Chat</h1></div>
+    <div class="main" id="main">
+      <div id="temp"></div>
+      <div id="type"></div>
+    </div>
+    <div class="chat">
+      <form>
+        <input placeholder="名字" type="text" name="" id="name">
+        <input placeholder="訊息" type="text" name="" id="msg">
+        <button id="button" type="button">送出</button>
+      </form>
+    </div>
+  </div>
+ 
+
+<script>
+  (function () {
+    var socket = io('http://localhost:2341'); //connect
+    //socket.emit("message", "Hello World"); // 往伺服器扔出一個"message" 事件
+
+    socket.on("newMessage", (obj)=>{ // 監聽newMessage事件 
+      var temp = "";
+      var NowDate=new Date();
+      var h=NowDate.getHours();
+      var m=NowDate.getMinutes();
+      var s=NowDate.getSeconds();
+      temp = obj.userName +":"+ obj.userMsg+"     ---    "+h+':'+m+"<br>" ; 
+      $('#temp').append(temp);
+      adjustScroll();
+      //$('#app').val(obj.name + "說了: "+obj.message);
+    });
+    
+    socket.on("allMessage", (obj)=>{ // 監聽allMessage事件 
+      //this.message = obj ;
+      //console.log(obj);
+      //$('#app').val(obj.name + "說了: "+obj.message);
+    });
+
+    $('input').on('keypress', function() {
+      socket.emit("typing");
+    });
+
+
+    socket.on("typing", (value)=>{
+      var type = false;
+      type = value ;
+      if(type){
+        temp = "有人在輸入...";
+      }else{
+        temp="";
+      }
+      $('#type').empty();
+      $('#type').append(temp);
+      adjustScroll();
+    });
+
+    $('#button').on('click', function() {
+      var userName = $('#name').val();
+      var userMsg = $('#msg').val();
+      var objMsg = {
+        userName:userName, userMsg:userMsg 
+      }
+      socket.emit("message", objMsg);
+      //var userName = $('#name').val("");
+      var userMsg = $('#msg').val("");
+    });
+
+
+    function adjustScroll(){
+      var scrolltop;
+      var clientheight = $('#main').prop('clientHeight');
+      var scrollheight = $('#main').prop('scrollHeight');
+      scrolltop = scrollheight - clientheight;
+      $("#main").scrollTop(scrolltop).animate('top');
+    }
+
+  })()
+</script>
+</body>
+</html>
